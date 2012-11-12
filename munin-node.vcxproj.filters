@@ -107,6 +107,24 @@
     <ClCompile Include="src\core\MuninPluginManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\plugins\swap\SwapMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\network\IfMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\network\PingMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\interrupts\InterruptsMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\disk\IoBytesMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\disk\IoOperationMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\extra\XEventLog.h">
@@ -204,6 +222,24 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\network\IfMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\interrupts\InterruptsMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\disk\IoBytesMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\disk\IoOperationMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\network\PingMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\swap\SwapMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

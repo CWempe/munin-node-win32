@@ -33,6 +33,12 @@
 #include "../plugins/speedfan/SpeedFanNodePlugin.h"
 #include "../plugins/PerfCounterMuninNodePlugin.h"
 #include "../plugins/external/ExternalMuninNodePlugin.h"
+#include "../plugins/network/IfMuninNodePlugin.h"
+#include "../plugins/network/PingMuninNodePlugin.h"
+#include "../plugins/swap/SwapMuninNodePlugin.h"
+#include "../plugins/interrupts/InterruptsMuninNodePlugin.h"
+#include "../plugins/disk/IoBytesMuninNodePlugin.h"
+#include "../plugins/disk/IoOperationMuninNodePlugin.h"
 
 #ifdef _DEBUG
 class MuninPluginManagerTestThread : public JCThread {
@@ -64,6 +70,31 @@ MuninPluginManager::MuninPluginManager()
     AddPlugin(new ProcessesMuninNodePlugin());
   if (g_Config.GetValueB("Plugins", "Network", true))
     AddPlugin(new NetworkMuninNodePlugin());
+  if (g_Config.GetValueB("Plugins", "If", true))
+    AddPlugin(new IfMuninNodePlugin());
+  if (g_Config.GetValueB("Plugins", "Interrupts", true))
+    AddPlugin(new InterruptsMuninNodePlugin());
+  if (g_Config.GetValueB("Plugins", "IoBytes", true))
+    AddPlugin(new IoBytesMuninNodePlugin());
+  if (g_Config.GetValueB("Plugins", "IoOperation", true))
+    AddPlugin(new IoOperationMuninNodePlugin());
+  if (g_Config.GetValueB("Plugins", "Ping", true))
+  {
+    size_t pingCount = g_Config.NumValues("PingPlugin");
+    for (size_t i = 0; i < pingCount; i++) {
+      std::string valueName = g_Config.GetValueName("PingPlugin", i);
+      std::string hostname = g_Config.GetValue("PingPlugin", valueName);
+      PingMuninNodePlugin *plugin = new PingMuninNodePlugin(hostname);
+      if (plugin->IsLoaded()) {
+        AddPlugin(plugin);
+      } else {
+        _Module.LogEvent("Failed to load Ping plugin: %s", hostname.c_str());
+        delete plugin;
+      }
+    }
+  }
+  if (g_Config.GetValueB("Plugins", "Swap", true))
+    AddPlugin(new SwapMuninNodePlugin());
   if (g_Config.GetValueB("Plugins", "Uptime", true))
     AddPlugin(new UptimeMuninNodePlugin());
   
