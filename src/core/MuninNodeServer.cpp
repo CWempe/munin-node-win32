@@ -32,7 +32,6 @@ void *MuninNodeServer::Entry()
 {	
 	int portNumber = g_Config.GetValueI("MuninNode", "PortNumber", 4949);
 	bool logConnections = g_Config.GetValueB("MuninNode", "LogConnections", true);
-	std::string masterAddress = g_Config.GetValue("MuninNode", "MasterAddress", "*");
 	//std::string bindAddress = g_Config.GetValue("MuninNode", "BindAddress", "");
 	
 	//the socket function creates our SOCKET  
@@ -60,11 +59,10 @@ void *MuninNodeServer::Entry()
     // Wait for new client connection
     JCSocket *client = new JCSocket();
     if (m_ServerSocket.Accept(client)) {
-      // TODO: Add ip address matching, http://stackoverflow.com/questions/594112/matching-an-ip-to-a-cidr-mask-in-php5
       const char *ipAddress = inet_ntoa(client->m_Address.sin_addr);
       if( !ipAddress )
          ipAddress = "unknown address";
-	  if (masterAddress == "*" || ipAddress == masterAddress) {
+	  if (AccessAllowed(ipAddress)) {
 		  if(logConnections){
 			_Module.LogEvent("Connection from %s", ipAddress);
 		  }
@@ -73,6 +71,7 @@ void *MuninNodeServer::Entry()
 		  clientThread->Run();
 	  } else {
 		  _Module.LogError("Rejecting connection from %s", ipAddress);
+          delete client;
 	  }
     } else {
       delete client;
@@ -83,4 +82,21 @@ void *MuninNodeServer::Entry()
   m_ServerSocket.Shutdown(SD_SEND);
 
   return 0;
+}
+
+int MuninNodeServer::AccessAllowed(const char *ip)
+{
+  size_t keyID = g_Config.FindKey("AccessList");
+  if ( keyID != g_Config.noID) {
+    size_t allowipCount = g_Config.NumValues(keyID);
+    for (size_t i = 0; i < allowipCount; i++) {
+      std::string aip = g_Config.GetValue(keyID, i, "");
+      // TODO: Add ip address matching, http://stackoverflow.com/questions/594112/matching-an-ip-to-a-cidr-mask-in-php5
+      if (!strcmp(ip, aip.c_str())) {
+        return 1;
+      }
+    }
+    return allowipCount == 0;
+  }
+  return 1;
 }
