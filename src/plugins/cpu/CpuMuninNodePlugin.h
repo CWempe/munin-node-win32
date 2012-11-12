@@ -12,13 +12,5 @@ public:
   virtual bool AutoConf() { return TRUE; };
   virtual int GetConfig(char *buffer, int len);
   virtual int GetValues(char *buffer, int len);
-  virtual bool IsLoaded() { return true; }
-
-private:
-  void CalculateCpuLoad();
-
-  double dbIdleTime;
-  double dbSystemTime;  
-  LARGE_INTEGER liOldIdleTime;
-  LARGE_INTEGER liOldSystemTime;
+  virtual bool IsLoaded() { return true; };
 };
