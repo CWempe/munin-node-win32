@@ -139,6 +139,11 @@ MuninPluginManager::~MuninPluginManager()
 
 void MuninPluginManager::AddPlugin(MuninNodePlugin *plugin)
 {
+  if (!plugin->AutoConf())
+  {
+    delete plugin;
+    return;
+  }
   _Module.LogEvent("Loaded plugin [%s - %s]", typeid(*plugin).name(), plugin->GetName());
   if (!plugin->IsThreadSafe())
     plugin = new MuninNodePluginLockWrapper(plugin);
