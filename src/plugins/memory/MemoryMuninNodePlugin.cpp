@@ -59,10 +59,10 @@ int MemoryMuninNodePlugin::GetValues(char *buffer, int len)
   MEMORYSTATUSEX mem;
   mem.dwLength = sizeof(MEMORYSTATUSEX);
   GlobalMemoryStatusEx(&mem);
-  _snprintf(buffer, len, "apps.value %llu\n"
-    "swap.value %llu\n"
-    "free.value %llu\n"
-    "committed.value %u\n"
+  _snprintf(buffer, len, "apps.value %I64lu\n"
+    "swap.value %I64lu\n"
+    "free.value %I64lu\n"
+    "committed.value %I64lu\n"
     ".\n", mem.ullTotalPhys-mem.ullAvailPhys, mem.ullTotalPageFile-mem.ullTotalPhys, mem.ullAvailPhys, mem.ullTotalPageFile-mem.ullAvailPageFile);
   return 0;
 }
