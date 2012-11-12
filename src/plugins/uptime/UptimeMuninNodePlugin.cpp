@@ -19,37 +19,40 @@
 #include "StdAfx.h"
 #include "UptimeMuninNodePlugin.h"
 
+DWORDLONG GetTickCount_64(void)
+{
+  // Use highres timer for all operations on Windows
+  // The Timer starts at system boot and runs (on a Intel Quad core)
+  // with 14 million ticks per second. So it won't overflow for
+  // 35000 years.
+
+  // Convert hires ticks to milliseconds
+  static double tickFactor;
+  _LARGE_INTEGER li;
+
+  static bool first = true;
+  if (first) {
+    // calculate the conversion factor for the highres timer
+    QueryPerformanceFrequency(&li);
+    tickFactor = 1000.0 / li.QuadPart;
+    first = false;
+  }
+
+  QueryPerformanceCounter(&li);
+  return (DWORDLONG)(li.QuadPart * tickFactor);
+}
+
 UptimeMuninNodePlugin::UptimeMuninNodePlugin()
 {
-  PDH_STATUS status;
-  //char uptimeCounterPath[] = "\\Sistema\\Tiempo de actividad del sistema";
-  TString uptimeCounterPath = A2TConvert(g_Config.GetValue("UptimePlugin", "CounterPath", "\\System\\System Up Time"));
-  OSVERSIONINFO osvi;    
-  
-  m_PerfQuery = NULL;
-  m_UptimeCounter = NULL;
-
-  ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
-  osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-  if (!GetVersionEx(&osvi) || (osvi.dwPlatformId != VER_PLATFORM_WIN32_NT))
-    return; //unknown OS or not NT based
-
-  // Create a PDH query
-  if (PdhOpenQuery(NULL, 0, &m_PerfQuery) != ERROR_SUCCESS)
-    return;
-
-  // Associate the uptime counter with the query
-  status = PdhAddCounter(m_PerfQuery, uptimeCounterPath.c_str(), 0, &m_UptimeCounter);
-  if (status != ERROR_SUCCESS)
-    return;
+  GetTickCount64 = (PROCTICKCOUNT)GetProcAddress(GetModuleHandle(_T("Kernel32")), "GetTickCount64");
+  if (!GetTickCount64) {
+    GetTickCount64 = (PROCTICKCOUNT)GetTickCount_64;
+  }
 }
 
 UptimeMuninNodePlugin::~UptimeMuninNodePlugin()
 {
-  // Close the counter
-  PdhRemoveCounter(m_UptimeCounter);
-  // Close the query
-  PdhCloseQuery(&m_PerfQuery);
+
 }
 
 int UptimeMuninNodePlugin::GetConfig(char *buffer, int len) 
@@ -67,26 +70,8 @@ int UptimeMuninNodePlugin::GetConfig(char *buffer, int len)
 
 int UptimeMuninNodePlugin::GetValues(char *buffer, int len)
 { 
-  PDH_STATUS status;
-  PDH_FMT_COUNTERVALUE uptimeValue;
-
-  // Collect the uptime value
-  status = PdhCollectQueryData(m_PerfQuery);
-  if (status != ERROR_SUCCESS)
-  {
-    _snprintf(buffer, len, ".\n");
-     return -1;
-  }
-
-  // Get the formatted counter value
-  status = PdhGetFormattedCounterValue(m_UptimeCounter, PDH_FMT_LARGE, NULL, &uptimeValue);
-  if (status != ERROR_SUCCESS)
-  {
-    _snprintf(buffer, len, ".\n");
-     return -1;
-  }
-
-  _snprintf(buffer, len, "uptime.value %.2f\n.\n", (uptimeValue.largeValue / 86400.0f));
-
+  DWORDLONG tick = GetTickCount64();
+  double napok = tick / 86400000.0f ; // 86400 * 1000
+  _snprintf(buffer, len, "uptime.value %.2f\n.\n", napok);
   return 0;
 }
