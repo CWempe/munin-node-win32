@@ -8,6 +8,7 @@ public:
   virtual ~DiskMuninNodePlugin();
 
   virtual const char *GetName() { return "df"; };
+  virtual bool AutoConf() { return TRUE; };
   virtual int GetConfig(char *buffer, int len);
   virtual int GetValues(char *buffer, int len);
   virtual bool IsLoaded() { return true; };

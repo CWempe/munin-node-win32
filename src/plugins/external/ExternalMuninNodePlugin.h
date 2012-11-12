@@ -8,6 +8,7 @@ public:
   ExternalMuninNodePlugin(const std::string &externalPlugin, int timeout);
   virtual ~ExternalMuninNodePlugin();
 
+  virtual bool AutoConf() { return TRUE; };
   virtual int GetConfig(char *buffer, int len);
   virtual int GetValues(char *buffer, int len);
   virtual bool IsLoaded() { return !m_Name.empty(); };

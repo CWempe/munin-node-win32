@@ -10,6 +10,7 @@ public:
 
   virtual bool IsLoaded() { return m_Listener != NULL; };  
   virtual const char *GetName() { return "speedfan"; };
+  virtual bool AutoConf() { return IsLoaded(); };
   virtual int GetConfig(char *buffer, int len);
   virtual int GetValues(char *buffer, int len);
   virtual bool IsThreadSafe() { return true; };
