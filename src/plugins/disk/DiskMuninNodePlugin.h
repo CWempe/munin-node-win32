@@ -3,12 +3,13 @@
 
 class DiskMuninNodePlugin : public MuninNodePlugin {
   char drives[32][4];
+  bool enabled;
 public:
   DiskMuninNodePlugin();
   virtual ~DiskMuninNodePlugin();
 
   virtual const char *GetName() { return "df"; };
-  virtual bool AutoConf() { return TRUE; };
+  virtual bool AutoConf() { return enabled; };
   virtual int GetConfig(char *buffer, int len);
   virtual int GetValues(char *buffer, int len);
   virtual bool IsLoaded() { return true; };
