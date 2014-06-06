@@ -95,6 +95,7 @@
     <ClCompile Include="src\plugins\external\ExternalMuninNodePlugin.cpp" />
     <ClCompile Include="src\plugins\mbm\MBMMuninNodePlugin.cpp" />
     <ClCompile Include="src\plugins\memory\MemoryMuninNodePlugin.cpp" />
+    <ClCompile Include="src\plugins\network\IfMuninNodePlugin.cpp" />
     <ClCompile Include="src\plugins\network\NetworkMuninNodePlugin.cpp" />
     <ClCompile Include="src\plugins\PerfCounterMuninNodePlugin.cpp" />
     <ClCompile Include="src\plugins\process\ProcessesMuninNodePlugin.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="src\plugins\mbm\mbm.h" />
     <ClInclude Include="src\plugins\mbm\MBMMuninNodePlugin.h" />
     <ClInclude Include="src\plugins\memory\MemoryMuninNodePlugin.h" />
+    <ClInclude Include="src\plugins\network\IfMuninNodePlugin.h" />
     <ClInclude Include="src\plugins\network\NetworkMuninNodePlugin.h" />
     <ClInclude Include="src\plugins\PerfCounterMuninNodePlugin.h" />
     <ClInclude Include="src\plugins\process\ProcessesMuninNodePlugin.h" />

@@ -33,6 +33,7 @@
 #include "../plugins/speedfan/SpeedFanNodePlugin.h"
 #include "../plugins/PerfCounterMuninNodePlugin.h"
 #include "../plugins/external/ExternalMuninNodePlugin.h"
+#include "../plugins/network/IfMuninNodePlugin.h"
 
 #ifdef _DEBUG
 class MuninPluginManagerTestThread : public JCThread {
@@ -64,6 +65,8 @@ MuninPluginManager::MuninPluginManager()
     AddPlugin(new ProcessesMuninNodePlugin());
   if (g_Config.GetValueB("Plugins", "Network", true))
     AddPlugin(new NetworkMuninNodePlugin());
+  if (g_Config.GetValueB("Plugins", "If", true))
+    AddPlugin(new IfMuninNodePlugin());
   if (g_Config.GetValueB("Plugins", "Uptime", true))
     AddPlugin(new UptimeMuninNodePlugin());
   
