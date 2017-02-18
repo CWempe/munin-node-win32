@@ -20,22 +20,13 @@
 #include "StdAfx.h"
 #include "CpuMuninNodePlugin.h"
 
-#define SystemBasicInformation 0
-#define SystemTimeInformation 3
-
-#define Li2Double(x) ((double)((x).HighPart) * 4.294967296E9 + (double)((x).LowPart))
+// dunno this is good :(
+#define HZ 100
 
 // Initialisation
 CpuMuninNodePlugin::CpuMuninNodePlugin()
-{ 
-  dbCpuTimePercent = 0;
-  liOldSystemTime = 0;
-  liOldIdleTime = 0;
-  NtQuerySystemInformation = (PROCNTQSI)GetProcAddress(GetModuleHandle(_T("ntdll")), "NtQuerySystemInformation");
-  GetSystemTimes = (pfnGetSystemTimes)GetProcAddress(GetModuleHandle(_T("kernel32")), "GetSystemTimes");
+{
 
-  // Setup first call
-  CalculateCpuLoad();
 }
 
 CpuMuninNodePlugin::~CpuMuninNodePlugin()
@@ -43,90 +34,89 @@ CpuMuninNodePlugin::~CpuMuninNodePlugin()
 
 }
 
-void CpuMuninNodePlugin::CalculateCpuLoad()
+int CpuMuninNodePlugin::GetConfig(char *buffer, int len)
 {
-  if (NtQuerySystemInformation != NULL && GetSystemTimes != NULL) {
-    LONG status;
-    SYSTEM_TIME_INFORMATION SysTimeInfo;
-    SYSTEM_BASIC_INFORMATION SysBaseInfo;
+  int ret = 0;
 
-    // get number of processors in the system
-    status = NtQuerySystemInformation(SystemBasicInformation, &SysBaseInfo, sizeof(SysBaseInfo), NULL);
-    if (status != NO_ERROR) {
-      printf("Querying SystemBasicInformation failed: 0x%x\n", status);
-      return;
-    }
+  SYSTEM_INFO SystemInfo;
+  GetSystemInfo(&SystemInfo);
 
-    // get new system time
-    status = NtQuerySystemInformation(SystemTimeInformation, &SysTimeInfo, sizeof(SysTimeInfo), NULL);
-    if (status!=NO_ERROR) {
-      printf("Querying SystemTimeInformation failed: 0x%x\n", status);
-      return;
-    }
+  ret = _snprintf(buffer, len, "graph_title CPU usage\n"
+    "graph_category system\n"
+    "graph_info This graph shows how CPU time is spent.\n"
+    "graph_args --base 1000 -r --lower-limit 0 --upper-limit %d\n"
+    "graph_order system user idle\n"
+    "graph_vlabel %%\n"
+    "graph_scale no\n"
+    "graph_period second\n", 100*SystemInfo.dwNumberOfProcessors);
+  buffer += ret;
+  len -= ret;
 
-    // get new CPU times
-    // http://www.codeproject.com/Articles/9113/Get-CPU-Usage-with-GetSystemTimes
-    FILETIME ftIdleTime;
-    FILETIME ftKernelTime;
-    FILETIME ftUserTime;
-    BOOL result = GetSystemTimes((LPFILETIME)&ftIdleTime, (LPFILETIME)&ftKernelTime, (LPFILETIME)&ftUserTime);
-    if (result == FALSE) {
-      printf("GetSystemTimes failed\n");
-      return;
-    }
-    unsigned long long systemTime = FileTimeToInt64(ftKernelTime) + FileTimeToInt64(ftUserTime);
-    unsigned long long idleTime = FileTimeToInt64(ftIdleTime);
+  ret = _snprintf(buffer, len, "system.label system\n"
+    "system.draw AREA\n"
+    "system.max 5000\n"
+    "system.min 0\n"
+    "system.type DERIVE\n"
+    "system.warning 30\n"
+    "system.critical 50\n"
+    "system.info CPU time spent by the kernel in system activities\n"
+    "user.label user\n"
+    "user.draw STACK\n"
+    "user.min 0\n"
+    "user.max 5000\n"
+    "user.warning 80\n"
+    "user.type DERIVE\n"
+    "user.info CPU time spent by normal programs and daemons\n"
+    "idle.label idle\n"
+    "idle.draw STACK\n"
+    "idle.min 0\n"
+    "idle.max 5000\n"
+    "idle.type DERIVE\n"
+    "idle.info Idle CPU time\n");
+  buffer += ret;
+  len -= ret;
 
-    // if it's a first call - skip it
-    if (liOldIdleTime != 0)
-    {
-      // CurrentValue = NewValue - OldValue
-      __int64 diffIdleTime = idleTime - liOldIdleTime;
-      __int64 diffSystemTime = systemTime - liOldSystemTime;
+  strncat(buffer, ".\n", len);
 
-      dbCpuTimePercent = (1.0f - ((diffSystemTime > 0) ? ((float)diffIdleTime) / diffSystemTime : 0)) * 100;
-    }
-
-    // store new times
-    liOldIdleTime = idleTime;
-    liOldSystemTime = systemTime;
-  }
-  else {
-    printf("NtQuerySystemInformation or GetSystemTimes functions not available\n");
-  }
-}
-
-unsigned long long CpuMuninNodePlugin::FileTimeToInt64(const FILETIME & ft) 
-{
-  return (((unsigned long long)(ft.dwHighDateTime))<<32)|((unsigned long long)ft.dwLowDateTime);
-}
-
-int CpuMuninNodePlugin::GetValues(char *buffer, int len) 
-{
-  CalculateCpuLoad();
-
-  _snprintf(buffer, len, 
-    "cpu_user.value %f\n"
-  //  "cpu_system.value %f\n"
-    ".\n", this->dbCpuTimePercent);
   return 0;
 }
 
-int CpuMuninNodePlugin::GetConfig(char *buffer, int len) 
+int CpuMuninNodePlugin::GetValues(char *buffer, int len)
 {
-  strncpy(buffer, 
-    "graph_args -l 0 --vertical-label percent --upper-limit 100\n"
-    "graph_title Cpu usage\n"
-    "graph_category system\n"
-    "graph_info This graph shows what the machine uses its cpu for.\n"
-    "graph_order cpu_user\n"
-//    "graph_order cpu_system cpu_user\n"
-    "cpu_user.label user\n"
-    "cpu_user.draw AREA\n"
-    "cpu_user.info CPU used by user-space applications.\n"
-//    "cpu_system.label system\n"
-//    "cpu_system.draw STACK\n"
-//    "cpu_system.info CPU used by kernel.\n"
-    ".\n", len);
+  int index = 0;
+  int ret;
+  NTSTATUS ntret;
+  SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION spt[32];
+
+  SYSTEM_INFO SystemInfo;
+  GetSystemInfo(&SystemInfo);
+
+  /* We have array for 32 processor only :( */
+  if (SystemInfo.dwNumberOfProcessors <= 32) {
+
+    ntret = NtQuerySystemInformation (SystemProcessorPerformanceInformation, (PVOID) spt,
+      sizeof spt[0] * SystemInfo.dwNumberOfProcessors, NULL);
+    if (ntret == NO_ERROR)
+    {
+      unsigned long long user_time = 0ULL, kernel_time = 0ULL, idle_time = 0ULL;
+      for (unsigned int i = 0; i < SystemInfo.dwNumberOfProcessors; i++)
+      {
+        kernel_time += (spt[i].KernelTime.QuadPart - spt[i].IdleTime.QuadPart) * HZ / 10000000ULL;
+        user_time += spt[i].UserTime.QuadPart * HZ / 10000000ULL;
+        idle_time += spt[i].IdleTime.QuadPart * HZ / 10000000ULL;
+      }
+      ret = _snprintf(buffer, len, "system.value %I64u\n", kernel_time);
+      len -= ret;
+      buffer += ret;
+      ret = _snprintf(buffer, len, "user.value %I64u\n", user_time);
+      len -= ret;
+      buffer += ret;
+      ret = _snprintf(buffer, len, "idle.value %I64u\n", idle_time);
+      len -= ret;
+      buffer += ret;
+    }
+  }
+
+  strncat(buffer, ".\n", len);
   return 0;
 }

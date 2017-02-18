@@ -123,10 +123,24 @@
     <ClCompile Include="src\core\Service.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\TString.cpp">
-      <Filter>core</Filter>
+    <ClCompile Include="src\plugins\swap\SwapMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
     </ClCompile>
-    <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\plugins\network\IfMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\network\PingMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\interrupts\InterruptsMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\disk\IoBytesMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\disk\IoOperationMuninNodePlugin.cpp">
+      <Filter>Plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\plugins\PerfCounterMuninNodePlugin.h">
@@ -219,11 +233,24 @@
     <ClInclude Include="src\core\TString.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="src\stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="bird.ico" />
+    <ClInclude Include="src\plugins\network\IfMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\interrupts\InterruptsMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\disk\IoBytesMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\disk\IoOperationMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\network\PingMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\swap\SwapMuninNodePlugin.h">
+      <Filter>Plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="munin-node.rc" />

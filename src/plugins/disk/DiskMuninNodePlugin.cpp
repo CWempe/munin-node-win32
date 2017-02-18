@@ -22,6 +22,7 @@
 DiskMuninNodePlugin::DiskMuninNodePlugin() 
 {
   int i;
+  enabled = FALSE;
   for (i = 0; i < 32; i++) {
     drives[i][0] = NULL;
   }
@@ -35,6 +36,7 @@ DiskMuninNodePlugin::DiskMuninNodePlugin()
       // Remove it
       drives[i][0] = NULL;
     } else {
+      enabled = TRUE;
       i++;
     }
   }

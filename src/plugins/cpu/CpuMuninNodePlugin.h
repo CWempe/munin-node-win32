@@ -54,18 +54,8 @@ public:
   virtual ~CpuMuninNodePlugin();
 
   virtual const char *GetName() { return "cpu"; };
+  virtual bool AutoConf() { return TRUE; };
   virtual int GetConfig(char *buffer, int len);
   virtual int GetValues(char *buffer, int len);
-  virtual bool IsLoaded() { return NtQuerySystemInformation != NULL; }
-
-private:
-  void CalculateCpuLoad();
-  unsigned long long FileTimeToInt64(const FILETIME & ft);
-
-
-  PROCNTQSI NtQuerySystemInformation;
-  pfnGetSystemTimes GetSystemTimes;
-  double dbCpuTimePercent;
-  unsigned long long liOldIdleTime;
-  unsigned long long liOldSystemTime;
+  virtual bool IsLoaded() { return true; };
 };
