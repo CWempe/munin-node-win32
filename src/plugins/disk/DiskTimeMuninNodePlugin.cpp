@@ -92,7 +92,7 @@ bool DiskTimeMuninNodePlugin::OpenCounter()
   TCHAR diskTimeCounterPath[MAX_PATH] = {0};
   HCOUNTER diskTimeCounter;
   for (size_t i = 0; i < m_DiskTimeNames.size(); i++) {
-    _sntprintf(diskTimeCounterPath, MAX_PATH, _T("\\%s(%s)\\%s"), logicalDiskCounterName.c_str(), m_DiskTimeNames[i].c_str(), diskTimeCounterName.c_str());
+    _sntprintf(diskTimeCounterPath, MAX_PATH, _T("\\%s(%hs)\\%s"), logicalDiskCounterName.c_str(), m_DiskTimeNames[i].c_str(), diskTimeCounterName.c_str());
     // Associate the uptime counter with the query
     status = PdhAddCounter(m_PerfQuery, diskTimeCounterPath, 0, &diskTimeCounter);
     if (status != ERROR_SUCCESS)
@@ -127,8 +127,8 @@ int DiskTimeMuninNodePlugin::GetConfig(char *buffer, int len)
     printCount = _snprintf(buffer, len, "graph_title Disk Time\n"
       "graph_category system\n"
       "graph_args --base 1000 -l 0\n"
-      "graph_info %s\n"
-      "graph_vlabel %s\n", info->szExplainText, info->szCounterName);
+      "graph_info %ls\n"
+      "graph_vlabel %ls\n", info->szExplainText, info->szCounterName);
     len -= printCount;
     buffer += printCount;
 
